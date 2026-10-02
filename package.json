@@ -1,0 +1,27 @@
+{
+    "name": "wisetax-desktop",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "description": "WiseTax desktop foundation with executable synthetic purchases flow.",
+    "engines": {
+        "node": ">=24 <25",
+        "npm": ">=11 <12"
+    },
+    "packageManager": "npm@11.17.0",
+    "scripts": {
+        "validate": "node tools/validate.mjs && npm run format:check && npm run check:architecture && npm run typecheck && npm test",
+        "check:architecture": "node tools/check-architecture.mjs",
+        "typecheck": "tsc --noEmit",
+        "build": "tsc -p tsconfig.build.json",
+        "test": "node --test tests/purchases.test.ts",
+        "demo:purchases": "node src/presentation/cli/purchases-demo.ts",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "@types/node": "24.10.1",
+        "prettier": "3.4.2",
+        "typescript": "5.9.3"
+    }
+}

@@ -1,0 +1,14 @@
+.git/
+.saas/
+node_modules/
+dist/
+out/
+coverage/
+.tmp/
+.cache/
+.auth/
+data/
+backups/
+artifacts/
+playwright-report/
+test-results/

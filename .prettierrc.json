@@ -1,0 +1,17 @@
+{
+    "printWidth": 100,
+    "proseWrap": "preserve",
+    "tabWidth": 4,
+    "endOfLine": "lf",
+    "trailingComma": "all",
+    "overrides": [
+        {
+            "files": "*.code-workspace",
+            "options": {
+                "parser": "json"
+            }
+        }
+    ],
+    "singleQuote": true,
+    "useTabs": false
+}

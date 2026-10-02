@@ -16,7 +16,7 @@ Repositorio de implementación local de WiseTax. Rol lógico: desktop.
 
 Núcleo TypeScript de purchases ejecutable con fixtures sintéticas y repositorio en memoria. Obtener, consultar, revisar y aprobar localmente un lote, con aislamiento cliente/período y control de versiones. No hay ventana Electron/Angular, base SQLite, Playwright instalado ni integración SIN. El estado se pierde al terminar el proceso. Las decisiones include/exclude son intenciones manuales de demostración, sin clasificación ni validación tributaria.
 
-Alcance autorizado: [EN-WTX-001](../product/specs/EN-WTX-001-purchases-foundation.md) y [TS-WTX-001](../engineering/specs/TS-WTX-001-purchases-foundation.md). Node 24.19.0/npm 11.17.0; TypeScript y tipos de Node fijados en package-lock.
+Alcance autorizado: [EN-WTX-001](../product/specs/EN-WTX-001-purchases-foundation.md) y [TS-WTX-001](../engineering/archive/TS-WTX-001-purchases-foundation.md). Node 24.19.0/npm 11.17.0; TypeScript y tipos de Node fijados en package-lock.
 
 ## Estructura
 
@@ -72,12 +72,16 @@ La demo obtiene tres facturas ficticias, muestra el bloqueo de aprobación pendi
 
 ## Próximo paso
 
-Revisar el núcleo y contratos; especificar persistencia SQLite y UI Electron/Angular como siguiente entrega. Mantener contexto, decisiones y aprobación por versión al conectar esos adaptadores. El flujo real y las opciones tributarias requieren revisión con el contador.
+Núcleo y contratos cerrados como base de desarrollo. Especificar persistencia SQLite y UI Electron/Angular como siguiente entrega. Mantener contexto, decisiones y aprobación por versión al conectar esos adaptadores. El flujo real y las opciones tributarias requieren revisión con el contador.
 
-Producto e ingeniería viven en el [workspace](../README.md). Esquema y migraciones futuros pertenecerán a este repo; no habrá repo db separado para el almacenamiento embebido. Datos reales fuera del checkout. Git sigue sin commits ni remotos.
+Producto e ingeniería viven en el [workspace](../README.md). Esquema y migraciones futuros pertenecerán a este repo; no habrá repo db separado para el almacenamiento embebido. Datos reales fuera del checkout. La base está registrada en commits locales; no hay remotos configurados ni push.
 
 ## Formato y persistencia
 
 Indentación de cuatro espacios, con .editorconfig y Prettier fijado. Ejecutar npm run format para aplicar y npm run format:check para verificar. validate incluye la verificación de formato. Cambiar .editorconfig por sí solo no reescribe archivos.
 
 Las interfaces application/repositories incluyen lecturas y escrituras. Sus implementaciones viven en infrastructure/persistence/repositories; el repositorio actual es en memoria. Los handlers de commands coordinan inserts/updates y los de queries consultan; SQL, transacciones y driver SQLite quedarán dentro de Infrastructure al implementarse.
+
+## Cierre de la base — 2026-10-02
+
+EN-WTX-001 Accepted; TS-WTX-001 y TS-WTX-002 Implemented y archivadas en el workspace. Estándares locales en docs/DESKTOP_STANDARDS.md y docs/VISUAL_STANDARDS.md. No quedan decisiones bloqueantes del núcleo simulado; no constituye una entrega operativa del SIN.

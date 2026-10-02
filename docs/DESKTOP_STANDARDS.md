@@ -48,11 +48,11 @@ npm ci instala el lock. npm run validate ejecuta documentos/estructura, reglas d
 
 ## Núcleo purchases actual
 
-[TS-WTX-001](../../engineering/specs/TS-WTX-001-purchases-foundation.md) define los contratos. Repositorio volátil con compare-and-swap; decisiones include/exclude manuales y aprobación local por versión. Cada revisión o aprobación avanza la revisión. Un cambio de decisión o nota elimina la aprobación. Excluir exige motivo. No implementar elegibilidad tributaria automática mediante estos valores.
+[TS-WTX-001](../../engineering/archive/TS-WTX-001-purchases-foundation.md) define los contratos. Repositorio volátil con compare-and-swap; decisiones include/exclude manuales y aprobación local por versión. Cada revisión o aprobación avanza la revisión. Un cambio de decisión o nota elimina la aprobación. Excluir exige motivo. No implementar elegibilidad tributaria automática mediante estos valores.
 
 ## Formato y contratos de persistencia
 
 - Cuatro espacios, UTF-8 y LF. .editorconfig orienta al editor; npm run format aplica Prettier 3.4.2 y npm run format:check lo comprueba. Ambos repositorios tienen configuración propia. No formatear el framework o repositorios anidados desde el workspace.
 - application/repositories contiene contratos de lectura/escritura; infrastructure/persistence/repositories contiene implementaciones. application/services incluye Clock y PurchaseSource. No conservar carpetas common vacías.
 - Repositorios específicos de la capacidad; evitar un IRepository genérico y abstraer SQL/driver/transactions dentro de Infrastructure. CQRS organiza casos de uso; no exige almacenes separados. Para proyecciones complejas futuras, añadir consultas específicas cuando exista necesidad.
-- [TS-WTX-002](../../engineering/specs/TS-WTX-002-repository-layout-and-formatting.md) registra esta reorganización sin cambios de comportamiento ni conexiones DB.
+- [TS-WTX-002](../../engineering/archive/TS-WTX-002-repository-layout-and-formatting.md) registra esta reorganización sin cambios de comportamiento ni conexiones DB.

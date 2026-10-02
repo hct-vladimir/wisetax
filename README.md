@@ -2,33 +2,34 @@
 id: WISETAX-DESKTOP-GUIDE-001
 type: repository-guide
 document_id: WISETAX-DESKTOP-GUIDE-001
-version: 0.2.0
+version: 0.3.0
 status: Draft
+language: en
 created: 2026-10-01
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 ---
 
 # WiseTax Desktop
 
-Repositorio de implementación local de WiseTax. Rol lógico: desktop.
+Local WiseTax implementation repository. Logical role: desktop.
 
-## Estado actual
+## Current state
 
-Núcleo TypeScript de purchases ejecutable con fixtures sintéticas y repositorio en memoria. Obtener, consultar, revisar y aprobar localmente un lote, con aislamiento cliente/período y control de versiones. No hay ventana Electron/Angular, base SQLite, Playwright instalado ni integración SIN. El estado se pierde al terminar el proceso. Las decisiones include/exclude son intenciones manuales de demostración, sin clasificación ni validación tributaria.
+Executable TypeScript purchases core with synthetic fixtures and an in-memory repository. It obtains, lists, reviews and locally approves batches with client/period isolation and revision checks. There is no Electron/Angular window, SQLite, installed Playwright or SIN integration. State is lost when the process exits. Manual include/exclude decisions demonstrate intent; they do not classify or validate tax eligibility.
 
-Alcance autorizado: [EN-WTX-001](../product/specs/EN-WTX-001-purchases-foundation.md) y [TS-WTX-001](../engineering/archive/TS-WTX-001-purchases-foundation.md). Node 24.19.0/npm 11.17.0; TypeScript y tipos de Node fijados en package-lock.
+Accepted foundation: [EN-WTX-001](../product/specs/EN-WTX-001-purchases-foundation.md) and [TS-WTX-001](../engineering/archive/TS-WTX-001-purchases-foundation.md). Toolchain: Node.js 24.19.0/npm 11.17.0, with TypeScript and Node types pinned in package-lock.json.
 
-## Estructura
+## Structure
 
 ```text
 src/
     presentation/
-        desktop/ipc/                 # reservado: ventana y transporte Electron
+        desktop/ipc/                 # reserved: windows and desktop transport
         ui/features/
-            purchases/                # reservado: mesa de revisión
-            rcv/                      # reservado
-            declarations/             # reservado
-        cli/purchases-demo.ts       # demostración ejecutable
+            purchases/               # reserved: review workbench
+            rcv/                     # reserved
+            declarations/            # reserved
+        cli/purchases-demo.ts        # executable synthetic demo
     application/
         features/
             purchases/
@@ -37,26 +38,27 @@ src/
                     review-purchase/
                     approve-purchases/
                 queries/list-purchases/
-            rcv/                      # reservado: consolidate-rcv
-            declarations/             # reservado: submit-declaration
-        services/                   # capacidades externas y reloj
-        repositories/               # contratos de persistencia: lecturas/escrituras
-        workflows/                  # reservado: coordinación durable
-    domain/purchases/             # lote, decisiones, aprobación y revisiones
+            rcv/                     # reserved: consolidate-rcv
+            declarations/            # reserved: submit-declaration
+        services/                    # external capabilities and clock
+        repositories/                # persistence interfaces: reads/writes
+        workflows/                   # reserved: durable coordination
+    domain/purchases/                # batches, decisions, approval and revisions
     infrastructure/
-        sin/fixtures/               # datos simulados; sin portal
-        persistence/repositories/   # implementación en memoria
+        sin/fixtures/                # synthetic data; no portal access
+        persistence/repositories/    # in-memory implementation
         time/
-        credentials/                # reservado
-        files/                      # reservado
-    bootstrap/                    # construcción explícita, sin contenedor
-migrations/                     # reservado: SQLite futuro
-tests/                          # comportamiento del núcleo
+        credentials/                 # reserved
+        files/                       # reserved
+    bootstrap/                       # explicit composition; no container
+migrations/                          # reserved: future SQLite
+tests/                               # core behavior
+docs/                                # standards and architecture decisions
 ```
 
-Implementaciones concretas se conectan únicamente desde bootstrap. Domain y Application no importan infraestructura ni dependencias de runtime. [ADR](docs/decisions/ADR-0001-desktop-architecture.md) y [estándares](docs/DESKTOP_STANDARDS.md).
+Bootstrap wires concrete implementations. Domain/Application do not import Infrastructure or runtime integrations. See the [ADR](docs/decisions/ADR-0001-desktop-architecture.md) and [standards index](docs/DESKTOP_STANDARDS.md).
 
-## Ejecutar y verificar
+## Run and verify
 
 ```powershell
 npm ci
@@ -66,22 +68,22 @@ npm run build
 node dist/src/presentation/cli/purchases-demo.js
 ```
 
-validate ejecuta estructura/documentos, reglas de imports, typecheck y pruebas node:test. test y demo usan TypeScript nativo de Node; tsc verifica tipos por separado. build genera JavaScript en dist, ignorado por Git. No instalar navegadores ni configurar claves para estos comandos.
+validate runs document/structure, formatting, import architecture, type checking and node:test checks. Tests/demo use Node's native TypeScript support; tsc checks types separately. build emits JavaScript to ignored dist. These commands require no browser installation or credentials.
 
-La demo obtiene tres facturas ficticias, muestra el bloqueo de aprobación pendiente, registra decisiones y aprueba localmente. No es una app desktop completa; no presenta ni registra nada en el SIN.
+The demo obtains three fictitious invoices, demonstrates incomplete approval rejection, records simulated decisions and approves locally. It does not record or submit anything to SIN.
 
-## Próximo paso
+## Standards and language
 
-Núcleo y contratos cerrados como base de desarrollo. Especificar persistencia SQLite y UI Electron/Angular como siguiente entrega. Mantener contexto, decisiones y aprobación por versión al conectar esos adaptadores. El flujo real y las opciones tributarias requieren revisión con el contador.
+Use the [local Node.js/TypeScript profile](docs/NODE_TYPESCRIPT_PROFILE.md) as the reusable base and [coding standards](docs/CODING_STANDARDS.md) for WiseTax specifics. [Visual standards](docs/VISUAL_STANDARDS.md) cover desktop appearance and interaction; business rules remain in specifications and Domain/Application.
 
-Producto e ingeniería viven en el [workspace](../README.md). Esquema y migraciones futuros pertenecerán a este repo; no habrá repo db separado para el almacenamiento embebido. Datos reales fuera del checkout. La base está registrada en commits locales; no hay remotos configurados ni push.
+Documentation, code identifiers/comments, tests, developer messages and fixtures use English. Future Spanish accountant UI copy belongs to explicit Presentation localization. Workspace specifications may use Spanish.
 
-## Formato y persistencia
+Four-space formatting is enforced with .editorconfig and pinned Prettier. npm run format applies formatting; format:check verifies it and is included in validate. Changing .editorconfig alone does not rewrite files.
 
-Indentación de cuatro espacios, con .editorconfig y Prettier fijado. Ejecutar npm run format para aplicar y npm run format:check para verificar. validate incluye la verificación de formato. Cambiar .editorconfig por sí solo no reescribe archivos.
+## Persistence and next delivery
 
-Las interfaces application/repositories incluyen lecturas y escrituras. Sus implementaciones viven en infrastructure/persistence/repositories; el repositorio actual es en memoria. Los handlers de commands coordinan inserts/updates y los de queries consultan; SQL, transacciones y driver SQLite quedarán dentro de Infrastructure al implementarse.
+application/repositories owns read/write contracts; infrastructure/persistence/repositories owns implementations. Command handlers coordinate writes; query handlers read. Future SQL, transactions and the SQLite driver remain inside Infrastructure.
 
-## Cierre de la base — 2026-10-02
+Product/engineering artifacts live in the [workspace](../README.md). Future embedded schema/migrations belong here; no separate db repository is needed. Keep real data outside the checkout.
 
-EN-WTX-001 Accepted; TS-WTX-001 y TS-WTX-002 Implemented y archivadas en el workspace. Estándares locales en docs/DESKTOP_STANDARDS.md y docs/VISUAL_STANDARDS.md. No quedan decisiones bloqueantes del núcleo simulado; no constituye una entrega operativa del SIN.
+The foundation was closed on 2026-10-02: EN-WTX-001 Accepted, TS-WTX-001/002 Implemented and archived. There are no blocking decisions for the synthetic core. Specify UI tooling/packaging and SQLite next, preserving context, decisions and revision-based approval. Real tax options and the portal workflow require accountant review. Existing commits are local; there are no configured remotes or pushes.

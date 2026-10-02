@@ -31,11 +31,14 @@ export class ApprovePurchasesHandler {
         const input = validateApprovalInput(command);
         if (!input.ok) return input;
         const current = await this.repository.find(context.value);
-        if (!current) return failure('NOT_FOUND', 'No existe un lote para este cliente y período.');
+        if (!current) return failure('NOT_FOUND', 'No batch exists for this client and period.');
         const approved = approveBatch(current, command, this.clock.now());
         if (!approved.ok) return approved;
         return (await this.repository.save(approved.value, current.revision))
             ? approved
-            : failure('CONFLICT', 'El lote cambió mientras aprobabas. Consulta la versión actual.');
+            : failure(
+                  'CONFLICT',
+                  'The batch changed during approval. Reload the current revision.',
+              );
     }
 }

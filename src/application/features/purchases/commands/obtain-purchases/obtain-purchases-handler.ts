@@ -24,11 +24,14 @@ export class ObtainPurchasesHandler {
         const context = validateContext(command?.context);
         if (!context.ok) return context;
         if (await this.repository.find(context.value))
-            return failure('CONFLICT', 'Ya existe un lote para este cliente y período.');
+            return failure('CONFLICT', 'A batch already exists for this client and period.');
         const batch = createBatch(context.value, await this.source.fetch(context.value));
         if (!batch.ok) return batch;
         return (await this.repository.save(batch.value, null))
             ? batch
-            : failure('CONFLICT', 'Otro proceso creó el lote. Consulta la versión actual.');
+            : failure(
+                  'CONFLICT',
+                  'Another process created the batch. Reload the current revision.',
+              );
     }
 }

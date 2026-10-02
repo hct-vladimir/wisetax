@@ -22,7 +22,7 @@ export class FixturePurchaseSource implements PurchaseSource {
                 entry.context.period === context.period,
         );
         // Missing fixture is an error, not a claim that the portal had no purchases.
-        if (!fixture) throw new Error('No hay un origen simulado configurado para este contexto.');
+        if (!fixture) throw new Error('No synthetic source is configured for this context.');
         return structuredClone(fixture.invoices);
     }
 }

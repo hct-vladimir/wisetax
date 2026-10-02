@@ -46,7 +46,7 @@ function isValidDate(value: unknown, period: string): value is string {
 
 export function createBatch(context: PurchaseContext, invoices: unknown): Result<PurchaseBatch> {
     if (!Array.isArray(invoices))
-        return failure('INVALID_INPUT', 'El origen no devolvió un lote válido.');
+        return failure('INVALID_INPUT', 'The source did not return a valid batch.');
     const ids = new Set<string>();
     const purchases: ReviewedPurchase[] = [];
     let totalMinor = 0;
@@ -63,13 +63,13 @@ export function createBatch(context: PurchaseContext, invoices: unknown): Result
         ) {
             return failure(
                 'INVALID_INPUT',
-                'El lote contiene una factura inválida o un identificador duplicado.',
+                'The batch contains an invalid invoice or a duplicate identifier.',
             );
         }
         const amountMinor = invoice.amountMinor as number;
         totalMinor += amountMinor;
         if (!Number.isSafeInteger(totalMinor))
-            return failure('INVALID_INPUT', 'El total del lote excede el rango permitido.');
+            return failure('INVALID_INPUT', 'The batch total exceeds the supported range.');
         ids.add(invoice.id);
         purchases.push({
             id: invoice.id,
@@ -102,10 +102,7 @@ export function validateReviewInput(input: ReviewInput): Result<ReviewInput> {
         !['include', 'exclude'].includes(input.decision) ||
         (input.decision === 'exclude' && !input.note.trim())
     ) {
-        return failure(
-            'INVALID_INPUT',
-            'Revisa la decisión, el responsable y el motivo de exclusión.',
-        );
+        return failure('INVALID_INPUT', 'Check the decision, actor and exclusion reason.');
     }
     return success(input);
 }
@@ -118,11 +115,11 @@ export function reviewPurchase(
     const validation = validateReviewInput(input);
     if (!validation.ok) return validation;
     if (batch.revision !== input.expectedRevision)
-        return failure('CONFLICT', 'El lote cambió. Vuelve a consultarlo antes de revisar.');
+        return failure('CONFLICT', 'The batch changed. Reload it before reviewing.');
     if (!batch.purchases.some((purchase) => purchase.id === input.invoiceId))
-        return failure('NOT_FOUND', 'La factura no pertenece al lote seleccionado.');
+        return failure('NOT_FOUND', 'The invoice does not belong to the selected batch.');
     if (!Number.isSafeInteger(batch.revision + 1))
-        return failure('CONFLICT', 'La versión del lote excede el rango permitido.');
+        return failure('CONFLICT', 'The batch revision exceeds the supported range.');
     return success({
         ...batch,
         revision: batch.revision + 1,
@@ -150,10 +147,7 @@ export interface ApprovalInput {
 
 export function validateApprovalInput(input: ApprovalInput): Result<ApprovalInput> {
     if (!isRecord(input) || !isRevision(input.expectedRevision) || !isText(input.actor, 100)) {
-        return failure(
-            'INVALID_INPUT',
-            'Indica una versión y un responsable válidos para aprobar.',
-        );
+        return failure('INVALID_INPUT', 'Provide a valid revision and actor for approval.');
     }
     return success(input);
 }
@@ -166,16 +160,19 @@ export function approveBatch(
     const validation = validateApprovalInput(input);
     if (!validation.ok) return validation;
     if (batch.revision !== input.expectedRevision)
-        return failure('CONFLICT', 'El lote cambió. Revisa la versión actual antes de aprobar.');
-    if (batch.approval) return failure('CONFLICT', 'Esta versión ya tiene aprobación local.');
+        return failure(
+            'CONFLICT',
+            'The batch changed. Review the current revision before approval.',
+        );
+    if (batch.approval) return failure('CONFLICT', 'This revision already has local approval.');
     if (!batch.purchases.length || batch.purchases.some((purchase) => !purchase.review)) {
         return failure(
             'REVIEW_INCOMPLETE',
-            'Completa las decisiones de un lote con facturas antes de aprobar.',
+            'Complete the review of a nonempty batch before approval.',
         );
     }
     if (!Number.isSafeInteger(batch.revision + 1))
-        return failure('CONFLICT', 'La versión del lote excede el rango permitido.');
+        return failure('CONFLICT', 'The batch revision exceeds the supported range.');
     const revision = batch.revision + 1;
     return success({
         ...batch,

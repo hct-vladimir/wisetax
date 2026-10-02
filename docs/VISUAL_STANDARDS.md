@@ -2,82 +2,101 @@
 id: WISETAX-VISUAL-STANDARDS-001
 type: repository-standards
 document_id: WISETAX-VISUAL-STANDARDS-001
-version: 0.1.0
+version: 0.2.0
 status: Draft
+language: en
 created: 2026-10-01
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 ---
 
-# Dirección visual de WiseTax Desktop
+# WiseTax Desktop Visual Standards
 
-## Estado y fuente
+## Scope and baseline
 
-Propuesta Draft para refinar junto con el contador. Base: [STD-VISUAL-DESIGN](../../.saas/framework/standards/design/VISUAL_DESIGN_BASELINE.md) y [STD-ACCESSIBILITY](../../.saas/framework/standards/design/ACCESSIBILITY_BASELINE.md). Se define un patrón operacional local; no se adopta por ello el perfil SaaS de ClientWS.
+Draft visual direction for the future desktop UI; no graphical interface is implemented. Extend [STD-VISUAL-DESIGN](../../.saas/framework/standards/design/VISUAL_DESIGN_BASELINE.md) and [STD-ACCESSIBILITY](../../.saas/framework/standards/design/ACCESSIBILITY_BASELINE.md) with desktop conventions. These cross-cutting UI baselines apply to desktop interfaces too. Electron presents HTML-based content, so web accessibility principles still apply alongside native window behavior.
 
-El diseño no depende de Angular, React u otra biblioteca UI. La selección de componentes y su implementación se registra en Technical Spec después de revisar el flujo.
+This document defines appearance, layout, interaction presentation and visual accessibility. It does not define tax eligibility, approval conditions, workflow transitions, persistence, session handling or retry policy. Those belong to product/technical specifications and Application/Domain. A feature may map its specified status to a semantic visual role below without deriving business meaning from a color.
 
-## Composición
+The direction is independent of Angular or other component libraries. UI tooling and final theme scope require their own specification.
 
-- Cliente, identidad tributaria y período visibles durante el trabajo.
-- Navegación limitada a las capacidades disponibles; no crear dashboard con métricas decorativas.
-- Compras: tabla de revisión, selección de factura, detalle y propuesta con evidencia/motivo.
-- Propuesta no equivale a decisión ni a tratamiento aplicado en el SIN.
-- Acción primaria única por región: revisar una decisión o aprobar el lote según el contexto.
-- Aprobación local, aplicación en el portal, consolidación y presentación tienen etiquetas y confirmaciones distintas.
-- Mostrar bloqueo con motivo y qué falta; nunca tratar un período parcial como completo.
+## Window and workspace composition
 
-Mesa de trabajo es la composición recomendada para el piloto; revisión guiada es la alternativa por evaluar.
+Prefer the native Windows frame, title bar and minimize/maximize/close controls initially. Custom chrome needs a demonstrated benefit and validation of dragging, resizing, keyboard access and system controls.
 
-## Tokens propuestos
+Use a restrained workbench layout: compact navigation, page title/context region, primary content area, and optional detail pane. Prefer a table with adjacent detail for dense records. On narrower windows, place detail below content or use an accessible secondary view. Navigation, primary actions and readable content must remain reachable.
 
-| Token            | Claro   | Oscuro de referencia |
-| ---------------- | ------- | -------------------- |
-| canvas           | #F4F6FA | #141922              |
-| surface          | #FFFFFF | #1C2330              |
-| text             | #182337 | #EDF2FA              |
-| muted-text       | #526176 | #ACB9CE              |
-| border           | #DCE2EC | #354154              |
-| primary          | #254FA0 | #A9C8FF              |
-| on-primary       | #FFFFFF | #14294C              |
-| selected-surface | #EAF0FC | #263650              |
-| success-text     | #246647 | #92D6AE              |
-| warning-text     | #765300 | #EFCD80              |
+Define and test a practical minimum window size during UI implementation; do not choose it solely to fit a fixed mockup. Support maximize and restored layouts. Restore saved window bounds only when visible on the current monitor configuration. Keep menus/dialogs within visible bounds.
 
-Completar tokens danger, focus y disabled y verificar sus contrastes antes de implementación. Tema claro es la propuesta inicial; soporte oscuro definitivo por decidir y validar de forma completa. Las variantes del boceto siguen el tema del host para exploración, sin comprometer el alcance de temas del MVP.
+Use logical CSS sizes and flexible containers. Validate Windows scaling at 100%, 125%, 150% and 200%, movement between monitors and in-app zoom. Do not shrink fonts to fit columns or depend on physical pixels.
 
-Tipografía: sistema/Segoe UI; cuerpo 14px, etiquetas 12px, metadata mínimo 11px, títulos 20–24px. Importes alineados a la derecha con cifras tabulares y Bs explícito. IDs y fechas no se truncan sin acceso al valor completo.
+## Typography, spacing and density
 
-Espaciado basado en 4px; preferir 8/12/16/24px. Radios contenidos de 6–8px. Jerarquía mediante alineación, espacios y contraste antes de sombras o contenedores adicionales.
+Use the system font stack, with Segoe UI on Windows. Initial body text: 14px; secondary labels: 12px; headings: 20–24px. Essential information must not depend on tiny metadata. Support text enlargement without clipping.
 
-## Componentes iniciales
+Use a 4px spacing scale, commonly 8/12/16/24px. Prefer restrained 6–8px corner radii. Establish hierarchy through alignment, whitespace and contrast before adding shadows.
 
-Selectores de cliente/período; tabla de compras; estado textual; detalle de factura; selector de tratamiento (opciones del SIN por acordar); observación; resumen de lote; confirmación de aprobación; mensajes de estado y recuperación.
+Default to comfortable pointer targets, typically 32–36 CSS px high. Meet baseline target-size/spacing requirements and provide clear padding for compact icon controls. Density changes must preserve readable labels, keyboard access and focus visibility.
 
-No fijar el modelo tributario mediante un checkbox genérico de elegible. El contador debe definir opciones, condiciones y respaldo necesarios.
+Use right-aligned tabular digits for numeric columns and explicit unit/currency labels. Keep dates and identifiers readable; if truncation is necessary, offer the complete value through keyboard-accessible detail or expansion, not a hover-only tooltip.
 
-## Estados obligatorios del recorrido
+## Candidate color tokens
 
-| Estado             | Comportamiento                                                           |
-| ------------------ | ------------------------------------------------------------------------ |
-| Inicial            | Elegir cliente y período; no presentar datos de otro contexto            |
-| Cargando           | Indicar la operación; evitar doble activación                            |
-| Vacío              | Distinguir ausencia de compras de error de extracción                    |
-| Pendiente          | Mostrar falta de revisión o evidencia; bloquear aprobación incompleta    |
-| Revisado           | Registrar tratamiento concreto; no implicar ejecución externa            |
-| Aprobado local     | Indicar versión y quién aprobó; invalidar ante cambios materiales        |
-| Error local        | Mostrar error de lectura/guardado sin afirmar que el cambio se persistió |
-| Sesión vencida     | Ofrecer acceso/intervención y revalidar contexto al continuar            |
-| Resultado incierto | Solicitar verificación/reconciliación; no ofrecer reintento ciego        |
-| Verificado         | Mostrar evidencia del resultado en el SIN cuando exista integración      |
+| Token            | Light   | Dark reference |
+| ---------------- | ------- | -------------- |
+| canvas           | #F4F6FA | #141922        |
+| surface          | #FFFFFF | #1C2330        |
+| text             | #182337 | #EDF2FA        |
+| muted-text       | #526176 | #ACB9CE        |
+| border           | #DCE2EC | #354154        |
+| primary          | #254FA0 | #A9C8FF        |
+| on-primary       | #FFFFFF | #14294C        |
+| selected-surface | #EAF0FC | #263650        |
+| success-text     | #246647 | #92D6AE        |
+| warning-text     | #765300 | #EFCD80        |
+| error-text       | #A4262C | #FFB4B8        |
+| focus            | #254FA0 | #A9C8FF        |
+| disabled-text    | #687487 | #A2AEC0        |
 
-## Reflujo y accesibilidad
+These are candidate tokens, not validated color combinations. Check actual foreground/background pairs, hover/selection/focus variants and disabled presentation before accepting UI. Light is the initial proposal; the dark column is an exploratory reference, not a commitment to ship both themes.
 
-Desktop/laptop son el destino inicial. Al estrechar la ventana, detalle pasa debajo de tabla; tablas realmente bidimensionales permiten scroll horizontal controlado. No reducir tipografía para hacer caber columnas. NIT, período y acción principal permanecen accesibles.
+Meet adopted contrast requirements: 4.5:1 for normal text, 3:1 for large text and applicable controls/graphics. The decorative border token is not sufficient by itself to identify an interactive control. Use stronger semantic outlines where needed. Respect Windows high contrast/forced colors; do not rely on fixed palette colors or suppress system outlines.
 
-Teclado para todas las acciones, foco visible y conservación de foco al actualizar filas. Confirmaciones modales con foco contenido y retorno al disparador. Etiquetas persistentes; estado por texto y color. Anuncios discretos de cambios importantes y errores asociados al control.
+## Semantic visual roles
 
-## Evidencia antes de aceptar UI
+| Role        | Visual representation                                                                |
+| ----------- | ------------------------------------------------------------------------------------ |
+| Neutral     | Plain text or restrained badge with a descriptive label                              |
+| Information | Text plus an information icon when useful                                            |
+| Warning     | Warning text/icon; short label and supporting explanation                            |
+| Error       | Error text/icon with adjacent descriptive text                                       |
+| Success     | Success text/icon with an explicit label                                             |
+| Busy        | Progress indicator with a text label; reduced-motion alternative                     |
+| Selected    | Selected surface plus a non-color marker or semantic selected state                  |
+| Focused     | Clearly visible outline distinct from selection                                      |
+| Disabled    | Muted treatment preserving legibility; explanatory text when supplied by the feature |
 
-Verificar la app implementada con datos representativos y sintéticos: 20–30 filas, proveedor/nombre largo, varios pendientes y observaciones, carga/vacío/error, reanudación, teclado, zoom 200/400%, reflujo, contraste y temas seleccionados. Añadir checks automatizados de accesibilidad y revisión manual con lector de pantalla.
+Status labels and permitted actions come from the feature specification. Color, icon or badge alone must never communicate status. Do not imply that a green badge confirms an external tax operation unless the feature explicitly supplies that meaning.
 
-El boceto interactivo solo valida la composición y algunas interacciones simuladas; no sustituye esta evidencia.
+## Controls, tables and dialogs
+
+Prefer semantic HTML and platform-familiar controls. Use a consistent button hierarchy and one visually dominant action per region. Icon-only actions need accessible names; avoid hiding essential actions until hover.
+
+Tables need associated headers, readable row spacing and distinguishable hover, selection and focus. Use horizontal scrolling only for genuinely two-dimensional content; keep surrounding controls responsive. A styled table is not automatically an ARIA grid: choose a grid only if its keyboard model is implemented.
+
+Use persistent field labels, associated helper/error text, and predictable alignment. Place primary/supporting content consistently. Use dialogs for focused interactions, with a clear title, visible dismissal when allowed by the feature, contained focus and return to the trigger. Do not nest modals.
+
+## Keyboard, focus and feedback
+
+All controls must be usable by keyboard. Follow visual reading order for Tab; preserve focus through content updates. Use platform-familiar shortcuts and visible menu accelerators where applicable, without overriding reserved OS shortcuts. Add arrow-key navigation only for components with an established accessible pattern.
+
+Use semantic progress and polite live announcements for meaningful updates; reserve interruptive alerts for important errors. Do not announce every row change. Keep labels and messages concise; translated product copy must fit without clipping.
+
+Respect reduced-motion preferences and avoid decorative animation. Check screen-reader navigation in the actual desktop window, including dialogs and the native/application boundary.
+
+## Evidence before UI acceptance
+
+Use synthetic representative content: 20–30 rows, long names/identifiers, large values and multiline detail. Check restored/maximized/narrow windows, multiple monitor configurations, Windows scaling, keyboard-only navigation, focus, screen reader, contrast and the themes selected for delivery.
+
+Check zoom at 200% and reflow at 400% (or the adopted equivalent viewport), allowing the baseline exception for two-dimensional tables. Use automated accessibility checks plus manual desktop review. A browser mockup or token table does not establish compliance for a packaged application.
+
+References: [Electron accessibility](https://www.electronjs.org/docs/latest/tutorial/accessibility).

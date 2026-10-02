@@ -31,11 +31,11 @@ export class ReviewPurchaseHandler {
         const input = validateReviewInput(command);
         if (!input.ok) return input;
         const current = await this.repository.find(context.value);
-        if (!current) return failure('NOT_FOUND', 'No existe un lote para este cliente y período.');
+        if (!current) return failure('NOT_FOUND', 'No batch exists for this client and period.');
         const changed = reviewPurchase(current, command, this.clock.now());
         if (!changed.ok) return changed;
         return (await this.repository.save(changed.value, current.revision))
             ? changed
-            : failure('CONFLICT', 'El lote cambió mientras revisabas. Consulta la versión actual.');
+            : failure('CONFLICT', 'The batch changed during review. Reload the current revision.');
     }
 }

@@ -7,25 +7,25 @@ function unwrap<T>(result: Result<T>): T {
 }
 
 const purchases = createDemoModule();
-const context = { clientId: 'demo-comercial-a', period: '2026-09' };
-console.log('WiseTax — demo sintética de purchases. Almacenamiento en memoria.');
+const context = { clientId: 'demo-business-a', period: '2026-09' };
+console.log('WiseTax — synthetic purchases demo. In-memory storage.');
 let batch = unwrap(await purchases.obtain.execute({ context }));
 console.table(
     batch.purchases.map((invoice) => ({
-        factura: invoice.invoiceNumber,
-        proveedor: invoice.issuerName,
-        centavosBOB: invoice.amountMinor,
+        invoice: invoice.invoiceNumber,
+        supplier: invoice.issuerName,
+        amountMinorBOB: invoice.amountMinor,
     })),
 );
 
 const blocked = await purchases.approve.execute({
     context,
     expectedRevision: batch.revision,
-    actor: 'contador-demo',
+    actor: 'demo-accountant',
 });
 if (blocked.ok || blocked.error.code !== 'REVIEW_INCOMPLETE')
-    throw new Error('La aprobación incompleta no se bloqueó.');
-console.log('Aprobación bloqueada:', blocked.error.message);
+    throw new Error('Incomplete approval was not blocked.');
+console.log('Approval blocked:', blocked.error.message);
 
 for (const invoice of batch.purchases) {
     batch = unwrap(
@@ -36,9 +36,9 @@ for (const invoice of batch.purchases) {
             decision: invoice.id === 'demo-103' ? 'exclude' : 'include',
             note:
                 invoice.id === 'demo-103'
-                    ? 'Exclusión ficticia para demostrar la revisión.'
-                    : 'Decisión ficticia de demostración.',
-            actor: 'contador-demo',
+                    ? 'Synthetic exclusion to demonstrate review.'
+                    : 'Synthetic demonstration decision.',
+            actor: 'demo-accountant',
         }),
     );
 }
@@ -46,13 +46,13 @@ batch = unwrap(
     await purchases.approve.execute({
         context,
         expectedRevision: batch.revision,
-        actor: 'contador-demo',
+        actor: 'demo-accountant',
     }),
 );
 const listed = unwrap(await purchases.list.execute({ context }));
 console.log(
-    `Aprobación local de la versión ${listed.approval?.revision}; ${listed.purchases.length} compras revisadas.`,
+    `Local approval of revision ${listed.approval?.revision}; ${listed.purchases.length} purchases reviewed.`,
 );
 console.log(
-    'Las decisiones son ficticias; no se registró ni declaró nada en el SIN. El estado se pierde al terminar.',
+    'These decisions are synthetic; nothing was recorded or submitted to SIN. State is lost on exit.',
 );

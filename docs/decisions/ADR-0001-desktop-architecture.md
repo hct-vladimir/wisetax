@@ -4,86 +4,85 @@ type: decision-record
 decision_id: ADR-WTX-0001
 version: 0.1.0
 status: Accepted
+language: en
 created: 2026-10-01
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 ---
 
-# ADR-WTX-0001: Desktop con Clean Architecture y slices por módulo
+# ADR-WTX-0001: Desktop Clean Architecture with module slices
 
-## Contexto
+## Context
 
-Observed antes de TS-WTX-001: desktop contenía un scaffold sin código funcional. El producto utiliza Node.js/TypeScript, Playwright y SQLite como dirección prevista; interfaz, empaquetado y driver aún no se han seleccionado.
+Before TS-WTX-001, desktop was a scaffold without functional code. Node.js/TypeScript, Playwright and SQLite were the intended direction; UI, packaging and the database driver had not been selected.
 
-La conversación acuerda Presentation, Application, Domain e Infrastructure; agrupación purchases, rcv y declarations; comandos/consultas por caso de uso; interfaces con implementaciones y ensamblado explícito sin contenedor de dependencias. Se toma la organización de MedhPortal como referencia conceptual, sin copiar sus obligaciones .NET, MediatR, EF Core ni database-first.
+The owner agreed on Presentation, Application, Domain and Infrastructure; purchases, rcv and declarations modules; commands/queries by use case; and interfaces with implementations assembled explicitly without a dependency container. MedhPortal provides a conceptual reference, without importing its .NET, MediatR, EF Core or database-first obligations.
 
-Fuente de producto: [alcance 0.1](../../../product/drafts/DRAFT-20261001-wisetax-v0.1.md) y [primera slice/UI](../../../product/drafts/DRAFT-20261001-first-slice-and-ui.md). Son drafts: este ADR no autoriza implementación tributaria.
+Product sources: [0.1 scope](../../../product/drafts/DRAFT-20261001-wisetax-v0.1.md) and [first slice/UI](../../../product/drafts/DRAFT-20261001-first-slice-and-ui.md). These remain drafts; this ADR does not authorize tax operations.
 
-## Decisión
+## Decision
 
-Organizar src en presentation, application, domain, infrastructure y bootstrap. Features dentro de application/features, con módulos purchases, rcv y declarations. Añadir clientes/contexto mínimo solo donde el recorrido lo requiera.
+Organize src into presentation, application, domain, infrastructure and bootstrap. Group features in application/features by purchases, rcv and declarations. Add minimal client/context modeling only where needed by a specified flow.
 
-Cada módulo agrupa commands y queries por operación. Request, handler, resultado y validación pertenecen a la slice; no mover tipos a shared solo por tamaño. Centralizar únicamente tipos/reglas realmente comunes del módulo.
+Each module groups commands and queries by operation. Requests, handlers, results and validation belong near the slice; do not move types to shared merely because a file grows. Centralize only genuinely common module contracts/rules.
 
-- presentation/desktop: lifecycle de ventanas y comunicación local; handlers de transporte delgados.
-- presentation/ui/features: componentes, interacción y estado de vista.
-- application/features: casos de uso, validación y coordinación.
-- application/services: interfaces de capacidades externas que necesitan los casos de uso, como integración SIN y archivos.
-- application/common/interfaces: interfaces de persistencia y dependencias transversales necesarias.
-- application/workflows: coordinación durable entre compras, RCV y formularios.
-- domain: reglas, estados, aprobaciones y valores de negocio, sin imports Electron/Playwright/SQLite.
-- infrastructure: implementaciones SIN/Playwright, persistencia/SQLite, credenciales y archivos.
-- bootstrap: punto de composición explícita de implementaciones y casos de uso.
+- presentation/desktop: window lifecycle and local communication, with thin transport handlers.
+- presentation/ui/features: components, interaction and view state.
+- application/features: use cases, validation and coordination.
+- application/services: interfaces for external capabilities and variable inputs, such as SIN integration, files and Clock.
+- application/repositories: persistence read/write interfaces (the finalized location from TS-WTX-002).
+- application/workflows: durable coordination across purchases, RCV and forms.
+- domain: business values, rules, states and approvals, without Electron/Playwright/SQLite imports.
+- infrastructure: SIN/Playwright, persistence/SQLite, credential and file implementations.
+- bootstrap: explicit composition of concrete implementations and use cases.
 
-Los contratos de entrada/salida se conservan junto al caso de uso. Los detalles de canales IPC pertenecen a presentation/desktop/ipc; no llamar services a DTOs o mensajes.
+Keep input/output contracts near the use case. IPC channel details belong to presentation/desktop/ipc; DTOs/messages are not services.
 
-No usar contenedor DI, decoradores de inyección o mediador obligatorio. Bootstrap construye objetos o funciones y pasa las implementaciones requeridas. Application no instancia directamente sus adaptadores concretos. Este ensamblado manual conserva la inversión de dependencias aunque no utilice una biblioteca DI.
+Do not require a DI container, injection decorators or mediator. Bootstrap constructs objects/functions and supplies implementations. Application does not instantiate concrete adapters. Manual composition preserves dependency inversion.
 
-Obtain-purchases es comando si guarda un lote local; list-purchases es consulta. Separar approve-purchases local de apply-approved-purchases en el portal.
+obtain-purchases is a command when it saves a local batch; list-purchases is a query. Keep local approve-purchases separate from a future apply-approved-purchases portal operation.
 
-El workflow guarda estado por cliente/período y seguimiento independiente de RCV y cada formulario. Ninguna transacción SQLite abarca el SIN. Tras efecto externo incierto, reconciliar antes de reintentar. Persistir estado no implica restaurar una sesión de navegador válida.
+The planned workflow persists client/period context and independent RCV/form progress. No SQLite transaction spans SIN. Reconcile an uncertain external side effect before retrying. Persistent workflow state does not restore a valid browser session automatically.
 
-## Dependencias
+## Dependencies
 
-Application depende de Domain y de sus propias interfaces; Infrastructure depende de esas interfaces y las implementa. Presentation usa la superficie pública de Application a través del transporte apropiado. Solo el punto de composición conecta clases concretas de distintas capas.
+Application depends on Domain and its own interfaces; Infrastructure implements those interfaces. Presentation uses Application through the appropriate transport. The composition root connects concrete implementations across layers.
 
-Si se elige Electron, renderer no importa SQLite, Playwright, credenciales ni handlers privilegiados. El puente expone operaciones concretas validadas. La integración SIN debe ejecutarse sin bloquear la UI; el proceso concreto se define en Technical Spec.
+If Electron is selected, the renderer must not import SQLite, Playwright, credentials or privileged handlers. Its bridge exposes specific validated operations. SIN automation must not block the UI; the concrete process model belongs to a Technical Spec.
 
-## Alternativas consideradas
+## Alternatives considered
 
-- Carpetas técnicas globales: fácil scaffold, peor localidad cuando crece cada caso de uso.
-- Slices sin fronteras externas: rápidas al inicio, pero acoplan reglas a selectores SIN y almacenamiento.
-- Clean Architecture con muchas capas/proyectos obligatorios: mayor ceremonial para este volumen.
-- Contenedor DI y mediador: no necesarios para las primeras slices; ensamblado manual suficiente.
-- Microservicios o event sourcing integral: fuera del alcance local actual.
+- Global technical folders: easy scaffold, weaker use-case locality as code grows.
+- Slices without outer boundaries: fast initially, but couple rules to SIN selectors/storage.
+- Clean Architecture with many mandatory layers/projects: excessive ceremony at this volume.
+- DI container/mediator: unnecessary for initial slices; manual composition is sufficient.
+- Microservices or comprehensive event sourcing: outside current local scope.
 
-## Consecuencias
+## Consequences
 
-Permite probar workflows con integración SIN simulada y reemplazar la persistencia con trabajo acotado. Mantiene terminología familiar del portfolio. Exige controlar imports y no convertir services en clases que concentren todos los casos de uso.
+Synthetic integrations make use cases testable and persistence replaceable with bounded work. The terminology remains familiar within the portfolio. Import rules are necessary, and services must not become classes containing every use case.
 
-No garantiza una migración SaaS automática: autenticación, autorización, aislamiento, sincronización y despliegue seguirán necesitando diseño propio.
+A later SaaS migration still needs its own authentication, authorization, isolation, synchronization and deployment design.
 
-Electron + Angular es una propuesta pendiente. Angular no es requisito de Electron. Su uso en la UI, si se selecciona, no añade contenedor al motor Application.
+Electron + Angular remains a proposal. Angular is not required by Electron; if selected for UI, it does not introduce a container into the Application engine.
 
-## Verificación prevista
+## Verification and review triggers
 
-Cuando exista implementación: typecheck; reglas de imports entre capas y renderer; pruebas de handlers con interfaces simuladas; persistencia/reapertura; aislamiento por cliente/período; invalidación de aprobaciones; reconciliación sin doble escritura; contratos IPC y build de desktop.
+Planned integration checks: layer/renderer imports, handler behavior with simulated interfaces, persistence/reopen, client/period isolation, approval invalidation, reconciliation without duplicate writes, IPC contracts and desktop build.
 
-La validación actual solo comprueba estructura y documentos. No se presenta como prueba funcional de estas propiedades.
+Initial scaffold checks covered only documents/structure. Current synthetic core checks additionally cover formatting, imports, types and behavior tests; they do not establish SIN/SQLite or renderer properties.
 
-## Disparadores de revisión
+Revisit for new UI/runtime choices, multiple executors, parallelism, multi-device synchronization, a remote backend or SaaS deployment design.
 
-Nuevas decisiones de UI/runtime, varios ejecutores, paralelismo, necesidad de sincronización entre equipos, backend remoto o primer diseño de despliegue SaaS.
+## Adoption and historical clarification
 
-## Enlaces
+The owner accepted this layer/composition direction and requested reorganization plus initial code on 2026-10-01. [TS-WTX-001](../../../engineering/archive/TS-WTX-001-purchases-foundation.md) applies it to the synthetic core; UI/SQLite remain later scope.
 
-- [Estándares locales](../DESKTOP_STANDARDS.md).
+At the owner's request, [TS-WTX-002](../../../engineering/archive/TS-WTX-002-repository-layout-and-formatting.md) finalized application/repositories, infrastructure/persistence/repositories and Clock in application/services. These replace the initial application/common/interfaces location, preserving dependency direction and contracts. Repositories cover reads and writes. tools/check-architecture.mjs checks the implemented source boundaries.
+
+The 2026-10-02 English translation preserves the accepted architecture and this clarification; it does not select a UI framework or database driver.
+
+## Links
+
+- [Local standards](../DESKTOP_STANDARDS.md).
 - [Engineering](../../../engineering/README.md).
 - [Decision Record Standard](../../../.saas/framework/standards/architecture/DECISION_RECORD_STANDARD.md).
-
-## Adopción de la estructura
-
-El propietario aceptó las propuestas y solicitó reorganización y código inicial el 2026-10-01. Se acepta la dirección de capas y composición manual. [TS-WTX-001](../../../engineering/archive/TS-WTX-001-purchases-foundation.md) aplica esta decisión al núcleo simulado; Electron/Angular y SQLite siguen pendientes para una entrega posterior. La arquitectura se comprueba con tools/check-architecture.mjs.
-
-## Aclaración de ubicación — 2026-10-01
-
-A solicitud del propietario, [TS-WTX-002](../../../engineering/archive/TS-WTX-002-repository-layout-and-formatting.md) concreta los contratos de persistencia en application/repositories, sus implementaciones en infrastructure/persistence/repositories y Clock en application/services. Estas ubicaciones reemplazan la carpeta common/interfaces de la descripción inicial; la dirección de dependencias y los contratos permanecen iguales. Repositorios cubren lecturas y escrituras. La validación actual también incluye typecheck, formato y las pruebas del núcleo simulado; las propiedades del SIN/SQLite siguen pendientes.

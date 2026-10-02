@@ -21,7 +21,7 @@ export function validateContext(value: unknown): Result<PurchaseContext> {
         typeof value.period !== 'string' ||
         !/^\d{4}-(0[1-9]|1[0-2])$/.test(value.period)
     ) {
-        return failure('INVALID_INPUT', 'Selecciona un cliente y período válidos (AAAA-MM).');
+        return failure('INVALID_INPUT', 'Select a valid client and period (YYYY-MM).');
     }
     return success({ clientId: value.clientId, period: value.period });
 }

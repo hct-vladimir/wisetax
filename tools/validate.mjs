@@ -39,6 +39,8 @@ for (const file of [
     'README.md',
     'AGENTS.md',
     'docs/DESKTOP_STANDARDS.md',
+    'docs/NODE_TYPESCRIPT_PROFILE.md',
+    'docs/CODING_STANDARDS.md',
     'docs/VISUAL_STANDARDS.md',
     'docs/decisions/ADR-0001-desktop-architecture.md',
 ]) {
@@ -46,6 +48,7 @@ for (const file of [
     const id = text.match(/^id: (.+)$/m)?.[1];
     assert.ok(id && !ids.has(id), 'Missing or duplicate ID: ' + file);
     ids.add(id);
+    assert.match(text, /^language: en$/m, 'English document metadata required: ' + file);
     assert.match(text, /^---\n[\s\S]*?\ntype: [a-z-]+\n[\s\S]*?\n---\n/);
     for (const match of text.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)) {
         const target = match[1].split('#')[0];

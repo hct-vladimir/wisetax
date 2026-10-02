@@ -18,7 +18,7 @@ const context = { clientId: 'demo-a', period: '2026-09' };
 const invoice: PurchaseInvoice = {
     id: 'a-1',
     invoiceNumber: '000001',
-    issuerName: 'Proveedor ficticio',
+    issuerName: 'Synthetic supplier',
     issuedOn: '2026-09-02',
     amountMinor: 125050,
 };
@@ -49,7 +49,7 @@ test('synthetic journey blocks pending approval and records decision and local a
             invoiceId: 'a-1',
             expectedRevision: batch.revision,
             decision: 'include',
-            note: 'Revisión ficticia',
+            note: 'Synthetic review',
             actor: 'demo',
         }),
     );
@@ -118,7 +118,7 @@ test('note-only review changes invalidate approval and stale updates leave curre
             invoiceId: 'a-1',
             expectedRevision: 1,
             decision: 'include',
-            note: 'Primera nota',
+            note: 'First note',
             actor: 'demo',
         }),
     );
@@ -135,7 +135,7 @@ test('note-only review changes invalidate approval and stale updates leave curre
             invoiceId: 'a-1',
             expectedRevision: approved.revision,
             decision: 'include',
-            note: 'Nueva nota',
+            note: 'New note',
             actor: 'demo',
         }),
     );
@@ -147,7 +147,7 @@ test('note-only review changes invalidate approval and stale updates leave curre
             invoiceId: 'a-1',
             expectedRevision: approved.revision,
             decision: 'exclude',
-            note: 'Nota antigua',
+            note: 'Old note',
             actor: 'demo',
         }),
         'CONFLICT',
@@ -162,7 +162,7 @@ test('note-only review changes invalidate approval and stale updates leave curre
     );
     assert.equal(
         unwrap(await module.list.execute({ context })).purchases[0]?.review?.note,
-        'Nueva nota',
+        'New note',
     );
 });
 
@@ -175,7 +175,7 @@ test('duplicate acquisition preserves decisions and revision', async () => {
             invoiceId: 'a-1',
             expectedRevision: 1,
             decision: 'exclude',
-            note: 'Decisión ficticia',
+            note: 'Synthetic decision',
             actor: 'demo',
         }),
     );
@@ -243,10 +243,10 @@ test('provider failure leaves no partial batch and can be retried after recovery
     const repository = new InMemoryPurchaseBatchRepository();
     const failing = new ObtainPurchasesHandler(repository, {
         fetch: async () => {
-            throw new Error('Fallo simulado');
+            throw new Error('Simulated failure');
         },
     });
-    await assert.rejects(failing.execute({ context }), /Fallo simulado/);
+    await assert.rejects(failing.execute({ context }), /Simulated failure/);
     assert.equal(await repository.find(context), null);
     const recovered = new ObtainPurchasesHandler(repository, new FixturePurchaseSource(fixtures));
     assert.equal(unwrap(await recovered.execute({ context })).revision, 1);
@@ -254,7 +254,7 @@ test('provider failure leaves no partial batch and can be retried after recovery
 
 test('missing fixture is an error and does not masquerade as an empty portal result', async () => {
     const module = createPurchasesModule([]);
-    await assert.rejects(module.obtain.execute({ context }), /origen simulado/);
+    await assert.rejects(module.obtain.execute({ context }), /synthetic source/);
     expectError(await module.list.execute({ context }), 'NOT_FOUND');
 });
 
@@ -267,7 +267,7 @@ test('concurrent review commands allow one write and reject the stale competitor
             invoiceId: 'a-1',
             expectedRevision: 1,
             decision: 'include',
-            note: 'Primera',
+            note: 'First',
             actor: 'demo',
         }),
         module.review.execute({
@@ -275,7 +275,7 @@ test('concurrent review commands allow one write and reject the stale competitor
             invoiceId: 'a-1',
             expectedRevision: 1,
             decision: 'exclude',
-            note: 'Segunda',
+            note: 'Second',
             actor: 'demo',
         }),
     ]);

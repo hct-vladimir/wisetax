@@ -23,6 +23,6 @@ export class ListPurchasesHandler {
         const batch = await this.repository.find(context.value);
         return batch
             ? success(batch)
-            : failure('NOT_FOUND', 'No existe un lote para este cliente y período.');
+            : failure('NOT_FOUND', 'No batch exists for this client and period.');
     }
 }
